@@ -13,7 +13,7 @@ cidr_fmt() {
 }
 
 # address range provided via cmdline args
-address_range=$@
+address_range=$1
 
 # length of the arg string
 length=${#address_range}
