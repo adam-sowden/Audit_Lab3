@@ -1,11 +1,7 @@
 #!/bin/bash
 #Port scanner written in BASH
 
-PLIST="1..23"
 IPADD="127.0.0.1"
-#STARTP="1"
-#ENDP="650"
-TESTLIST={1,2,22,631}
 
 #function for checking port status
 function CheckPort(){
@@ -13,24 +9,15 @@ function CheckPort(){
 
 }
 
-#function for checking range of ports
-function PortRange(){
-for PORTNUM in $(seq "$STARTP" "$ENDP"); do
-        CheckPort IPADD PORTNUM
-done
-}
-
 
 STARTP=$(echo $1 | cut -f1 -d-)
 ENDP=$(echo $1 | cut -f2 -d-)
+declare -a P2BS=($(seq "$STARTP" "$ENDP"))
+arraylength=${#P2BS[@]}
 
-echo "$STARTP"
-echo "$ENDP"
-
-#for PORTNUM in {$1}; do 
-#echo $PORTNUM
-#CheckPort IPADD PORTNUM
-#done 
-
-PortRange STARTP ENDP
+for (( i=1; i<${arraylength}+1; i++ ));
+do
+  PORTNUM=${P2BS[$i-1]}
+  CheckPort IPADD PORTNUM
+done
 
