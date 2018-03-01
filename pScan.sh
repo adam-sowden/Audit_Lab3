@@ -1,15 +1,52 @@
 #!/bin/bash
 #Port scanner written in BASH
 
+function displayIPUsage(){
+echo hi
+}
+
+function displayPortUsage(){
+echo "	-p
+		The -p option is for listing the ports to be scanned. The ports may be in a list seperated by commas without spaces or in a range with the starting port and the ending port seperated by a dash. The ports must be an actual port (within the values of 1-65,535) and if a range is given, have the lowest port first and the highest port second.
+		ex.) -p 22-445 
+		ex.) -p 22,23,24,25"
+}
+
 #function for checking port status. Will display Port <portnum> is open if open.
 function CheckPort(){
-(echo > /dev/tcp/"$IPADD"/"$PORTNUM")>& /dev/null && echo "Port "$PORTNUM" is open"
+(echo </dev/tcp/"$IPADD"/"$PORTNUM") &>/dev/null && echo Port $PORTNUM is open 
+#echo $PORTNUM
+#nc $IPADD $PORTNUM < /dev/null; echo $?
 }
 
 #function to get a list of ports when a range is given as arg.
 function getPortListRange(){
+
+#get the starting and ending port numbers for the args.
 STARTP=$(echo ${p} | cut -f1 -d-)
 ENDP=$(echo ${p} | cut -f2 -d-)
+
+#error checking to make sure that the ports are in valid form, exit if not.
+#make sure the lowest value port is first.
+if (( $STARTP > $ENDP ))
+then 
+	displayPortUsage
+	exit 1
+
+#make sure the first port is between 1 and 65535.
+elif (("$STARTP" > 65535)) || (("$STARTP" < 1))
+then
+	displayPortUsage
+	exit 1
+
+#make sure the second port is between 1 and 65535
+elif (( $ENDP > 65535 )) || (( $ENDP < 1 ))
+then
+	displayPortUsage
+	exit 1
+fi
+
+#get the port list for the specified ports. 
 PortList=($(seq "$STARTP" "$ENDP"))
 PLlength=${#PortList[@]}
 }
@@ -42,13 +79,11 @@ case $1 in
 	#checks if arg is a range.
 	if [[ $p =~ ^[0-9]{1,5}\-[0-9]{1,5}$ ]]
 	then
-		echo "its good bruh1"
 		getPortListRange $p
 	
 	#checks if arg is a list/single port.
 	elif [[ $p =~ ^(([0-9]{1,5}\,)*[0-9]{1,5})$ ]]
 	then
-		echo "its good bruh2"
                 getPortListCom $p
 
 	#if neither then display port usage message.
@@ -96,7 +131,7 @@ case $1 in
 esac
 done
 
-declare -a IPList=("127.0.0.1")
+declare -a IPList=("192.168.1.13")
 IPlength=${#IPList[@]}
 
 #chacks to see if portlist is not empty
