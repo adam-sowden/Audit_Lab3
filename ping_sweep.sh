@@ -1,15 +1,29 @@
 #!/bin/bash
 
+usage_string="usage: ./ping_sweep.sh [127.0.0.1-127.0.0.255 | 127.0.0.1/24]"
+
+if [[ $# -eq 0 || $# -gt 1 ]]
+then
+    echo $usage_string
+    exit 1
+fi
+
 # Function to handle address range given in 10.10.1.1-10.10.2.50 format
 dash_fmt() {
-    echo "Dash format of address"
-    echo $address_range
+    bottom_range=$(echo $address_range | cut -d"-" -f 1)
+    top_range=$(echo $address_range | cut -d"-" -f 2)
+    echo $bottom_range
+    echo $top_range
+
+    exit 0
 }
 
 # Function to handle address range given in 10.10.0.0/16 format
 cidr_fmt() {
     echo "Cidr format of address"
     echo $address_range
+
+    exit 0
 }
 
 # address range provided via cmdline args
