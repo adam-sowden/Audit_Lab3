@@ -34,11 +34,32 @@ The -p option is for listing the ports to be scanned. The ports may be in a list
 		ex.) -p 22,23,24,25"
 }
 
+#helper function for getiing ip range
+function atoi()
+{
+#Returns the integer representation of an IP arg, passed in ascii dotted-decimal notation (x.x.x.x)
+IP=$1; IPNUM=0
+for (( i=0 ; i<4 ; ++i )); 
+do
+((IPNUM+=${IP%%.*}*$((256**$((3-${i}))))))
+IP=${IP#*.}
+done
+echo $IPNUM 
+}
+
+#helper function for getting ip ranges
+function itoa()
+{
+#returns the dotted-decimal ascii form of an IP arg passed in integer format
+echo -n $(($(($(($((${1}/256))/256))/256))%256)).
+echo -n $(($(($((${1}/256))/256))%256)).
+echo -n $(($((${1}/256))%256)).
+echo $((${1}%256)) 
+}
+
 #function for checking port status. Will display Port <portnum> is open if open.
 function CheckPort(){
-(echo </dev/tcp/"$IPADD"/"$PORTNUM") &>/dev/null && echo Port $PORTNUM is open 
-#echo $PORTNUM
-#nc $IPADD $PORTNUM < /dev/null; echo $?
+(echo </dev/tcp/"$IPADD"/"$PORTNUM") &>/dev/null && echo "$PORTNUM (OPEN)" && cnt=$cnt+1
 }
 
 #function to get a list of ports when a range is given as arg.
@@ -93,13 +114,19 @@ case $CIDR in
 	NETWORK=$(echo ${ip} | cut -f 1-3 -d.)
 	IPListT=$(echo ${NETWORK}.{0..255})
 	IPList=$(echo ${IPListT} | cut -f 2-255 -d' ')
+	#make an array for the list of IPs
+	IFS=' ' read -r -a IPArray <<< "$IPList"
+	IPlength=${#IPArray[@]}
 	;;
 
 	#get a list of IPs on a /16 network.
 	16)
 	NETWORK=$(echo ${ip} | cut -f 1-2 -d.)
         IPListT=$(echo ${NETWORK}.{0..255}.{0..255})
-	IPList=$(echo ${IPListT} | cut -f 2-65535 -d' ')
+	IPList=$(echo ${IPListT} | cut -f 2-65535 -d' ') 
+	#make an array for the list of IPs
+	IFS=' ' read -r -a IPArray <<< "$IPList"
+	IPlength=${#IPArray[@]}
 	;;
 
 	#get the list of IPs on a /8 network
@@ -107,6 +134,9 @@ case $CIDR in
 	NETWORK=$(echo ${ip} | cut -f1 -d.)
         IPList=$(echo ${NETWORK}.{0..255}.{0.255}.{0..255})
 	IPList=$(echo ${IPListT} | cut -f 2-16777215 -d' ')
+	#make an array for the list of IPs
+	IFS=' ' read -r -a IPArray <<< "$IPList"
+	IPlength=${#IPArray[@]}
 	;;
 
 	#if the cider is not /24, /16, or /8. 
@@ -123,9 +153,30 @@ function getIPListRange(){
 StartIP=$(echo ${ip} | cut -f1 -d-)
 EndIP=$(echo ${ip} | cut -f2 -d-)
 
-echo $StartIP
-echo $EndIP
+sIP=`atoi "${StartIP}"`
+eIP=`atoi "${EndIP}"`
 
+IPList=''
+
+#if the first IP is less than the second
+if [ "$sIP" -le "$eIP" ]     
+        then
+
+	#while loop to cycle through the IPs
+        while [ "${sIP}" -le "${eIP}" ]; do
+        nIP=`itoa "${sIP}"`
+	IPList="$IPList $nIP"
+        let sIP=sIP+1
+        done
+	IFS=' ' read -r -a IPArray <<< "$IPList"
+        IPlength=${#IPArray[@]}
+
+#if the starting IP is greater than the ending IP   	
+else
+	displayIPUsage
+        exit 1
+
+fi
 }
 
 #takes in the arguments for the program
@@ -192,15 +243,16 @@ case $1 in
 esac
 done
 
-#make an array for the list of IPs
-IFS=' ' read -r -a IPArray <<< "$IPList" 
-IPlength=${#IPArray[@]}
+echo
+echo SCANNING:
+echo
 
 #for loop to cycle through all IPs
 for ((ip=1; ip<${IPlength}+1; ip++));
 do
 	IPADD=${IPArray[$ip-1]}
-	echo "$IPADD"
+	#echo "$IPADD"
+	cnt=0
 
 	#for loop to cycle through all ports
 	for (( prt=1; prt<${PLlength}+1; prt++ ));
@@ -214,5 +266,11 @@ do
 		fi
   		CheckPort IPADD PORTNUM
 	done
-	echo " "
+	if (( $cnt > 0 ))
+                then
+                echo "Are the ports open on $IPADD"
+		echo
+        fi
 done
+echo DONE!
+
