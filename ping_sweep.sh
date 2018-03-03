@@ -121,8 +121,8 @@ else
 fi
 }
 
+#send a ping to the IP and see if it is up or down.
 function checkIP(){
-
 #ping the IP address
 ping -c1 -W1 $IPADD &>/dev/null 
 status=$( echo $?)
@@ -174,7 +174,7 @@ esac
 done
 
 echo 
-echo SWEEPING
+echo IPs UP:
 echo 
 
 #for loop to cycle through all IPs
