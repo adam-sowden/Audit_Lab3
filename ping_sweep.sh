@@ -1,6 +1,7 @@
 #!/bin/bash
+#ping sweeping utility writen in BASH
 
-#display the useage
+#display the useage for the --help option
 function displayUsage(){
 echo "ping_sweep
 Usage: ping_sweep -ip <IP Range>
@@ -11,7 +12,7 @@ The -ip option is for listing the range of IP addresses that you wish to conduct
         ex.) -ip 192.168.1.0-192.168.1.50"
 }
 
-#Display usage when the IP address option is not valid.
+#display usage when the IP address option is not valid.
 function displayIPUsage(){
 echo "-ip <IP Range>
 The -ip option is for listing the range of IP addresses that you wish to conduct a ping sweep on. The range may be in cidr notation or an IP range with the start of the range first and the end of the range second seperated by a dash. The IP addresses must be valid for this utility to work.
@@ -20,8 +21,7 @@ The -ip option is for listing the range of IP addresses that you wish to conduct
 }
 
 #helper function for getiing ip ranges
-function atoi()
-{
+function atoi(){
 #Returns the integer representation of an IP arg, passed in ascii dotted-decimal notation (x.x.x.x)
 IP=$1; IPNUM=0
 for (( i=0 ; i<4 ; ++i ));
@@ -33,8 +33,7 @@ echo $IPNUM
 }
 
 #helper function for getting ip ranges
-function itoa()
-{
+function itoa(){
 #returns the dotted-decimal ascii form of an IP arg passed in integer format
 echo -n $(($(($(($((${1}/256))/256))/256))%256)).
 echo -n $(($(($((${1}/256))/256))%256)).
@@ -92,12 +91,15 @@ esac
 #function to get a list of IP addresses when a range is given as arg.
 function getIPListRange(){
 
+#get the start and end of the range.
 StartIP=$(echo ${ip} | cut -f1 -d-)
 EndIP=$(echo ${ip} | cut -f2 -d-)
 
+#convert start and end into integers.
 sIP=`atoi "${StartIP}"`
 eIP=`atoi "${EndIP}"`
 
+#empty list for putting the IPs in 
 IPList=''
 
 #if the first IP is less than the second
@@ -106,18 +108,28 @@ if [ "$sIP" -le "$eIP" ]
 
         #while loop to cycle through the IPs
         while [ "${sIP}" -le "${eIP}" ]; do
+
+	#convert back to ascii
         nIP=`itoa "${sIP}"`
+
+	#add the IP to the list
         IPList="$IPList $nIP"
+
+	#increment the IP
         let sIP=sIP+1
         done
+
+	#use the list to create an array
         IFS=' ' read -r -a IPArray <<< "$IPList"
+
+	#get the length of the array
         IPlength=${#IPArray[@]}
 
 #if the starting IP is greater than the ending IP       
 else
+	#display the usage for -ip
         displayIPUsage
         exit 1
-
 fi
 }
 
@@ -132,7 +144,19 @@ then
 fi
 }
 
-#takes in the arguments for the program
+###MAIN###
+###############################################################################
+#takes in the arguments for the program and perform the correct functions on 
+#them based on the format of the inputs.
+#check to see if there is args, if not exit and display usage.
+if [ -z "$1" ];
+then 
+	#display usage and exit.
+        displayUsage
+        exit 1
+fi
+
+#for loop to grab all arguments.
 for i in "$@"
 do
 case $1 in
@@ -144,77 +168,57 @@ case $1 in
         #checks to see if IP addresses are in cidr
         if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\/[0-9]{1,2}$ ]]
         then
+		#call the getIPListCidr function.
                 getIPListCidr $ip
 
         #Checks to see if the IP addresses are a range.
         elif [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\-[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]
         then
+		#call the getIPListRange function.
                 getIPListRange $ip
 
         #if IP address is in neither cidr or a range display IP address usage message.
         else
+		#display the usage for -ip
                 displayIPUsage
                 exit 1
         fi
-        shift
-        shift
         ;;
 
         #user uses --help to get the usage message.
         --help)
+	#display usage and exit.
         displayUsage
         exit 1
         ;;
 
-        #if nothing is submitted as arg.
+        #if any other case.
         *)
-        shift
+	#display usage and exit.
+	displayUsage
+        exit 1
         ;;
 esac
 done
 
+#formatting output.
 echo 
 echo IPs UP:
 echo 
 
-#for loop to cycle through all IPs
+#for loop to cycle through all IPs.
 for ((ip=1; ip<${IPlength}+1; ip++));
 do
+	#get the IP address from the array of IPs.
         IPADD=${IPArray[$ip-1]}
+
+	#call the checkIP function to see if it is up or not.
 	checkIP IPADD
 
 done
+
+#finished sweeping IPs.
 echo DONE!
 
-
-
-#dash_fmt() {
-  #  echo "Dash format of address"
- #   echo $address_range
-#}
-
-# Function to handle address range given in 10.10.0.0/16 format
-#cidr_fmt() {
-  #  echo "Cidr format of address"
- #   echo $address_range
-#}
-
-# address range provided via cmdline args
-#address_range=$1
-
-# length of the arg string
-#length=${#address_range}
-
-#for (( i=0; i<$length; i++ ));
-#do
-    #char=${address_range:$i:1}
-    #if [ $char == "-" ]
-   # then
-        # if the range provided has a dash in it parse using dash_fmt()
-     #   dash_fmt
-    #elif [ $char == "/" ]
-   # then
-        # if the range provided has a forward slash in it parse using cidr_fmt()
-  #      cidr_fmt
- #   fi
-#done
+#exit script.
+exit 1
