@@ -6,6 +6,10 @@ SAMPLE USAGE:
 
 This will scan the entire 192.168.0.0 network and then list wich devices respond to a ping in the IP range.
 
+./service-versions.py 192.168.0.0
+
+This will attempt to connect to all ports on the specified host and return the service banners of any open ports
+
 INSTALLATION:
 Download and unzip or clone the script from https://github.com/adam-sowden/Audit_Lab3.git
 Then change into the directory where the script is located and run the script.
