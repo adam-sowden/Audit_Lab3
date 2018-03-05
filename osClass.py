@@ -2,6 +2,14 @@ import os
 import sys
 import subprocess, platform
 
+###################################
+# Name: Oluwadunsola (Sola) Alabi # 
+# Date: 3/5/18			  #
+# File: osClass.py		  #
+# Group: 1		          #
+###################################
+
+#Parses a file and returns a lists of its contets
 def parseFile( file ):
         file = open ( file)
         lst = []
@@ -10,6 +18,7 @@ def parseFile( file ):
                 lst.append(line)
         return lst
 
+#Tries to ping the ip given. If an exception is raised (IP is down) then returns false else returns the output
 def pingTest( ipaddr ):
 	try:
 		output = subprocess.check_output("ping -{} 1 {}".format('n' if platform.system().lower()=="windows" else 'c', ipaddr), shell=True)
