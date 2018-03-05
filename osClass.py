@@ -11,15 +11,11 @@ def parseFile( file ):
         return lst
 
 def pingTest( ipaddr ):
-    hostname = ipaddr
-    response = os.system("ping -c 1 " + hostname)
-    # and then check the response...
-    if response == 0:
-        pingstatus = True
-    else:
-        pingstatus = False
-    return pingstatus
-
+	try:
+		output = subprocess.check_output("ping -{} 1 {}".format('n' if platform.system().lower()=="windows" else 'c', ipaddr), shell=True)
+	except Exception, e:
+		return False
+	return True
 
 def main():
         lst = parseFile(sys.argv[1])
@@ -28,4 +24,3 @@ def main():
 
 if __name__ == "__main__":
     	main()
-	main(sys.argv)
