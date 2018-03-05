@@ -33,6 +33,17 @@ def main():
 				final.append(1)
 		else :
 			final.append(0)
-	print(final)
+	for i in range(0,len(final)):
+		if (final[i] == 0):
+			print('Ip address: ' + lst[i] + ' is down' + '\n')
+			continue
+		if (final[i] == 1):
+			print('Ip address: ' + lst[i] + ' is up. OS: Windows \n')
+			continue
+		else:
+			print('Ip address: ' + lst[i] + ' is up. OS: Unix \n')
+			continue
+	return 0
+
 if __name__ == "__main__":
     	main()
