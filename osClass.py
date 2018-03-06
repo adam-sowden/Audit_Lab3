@@ -21,6 +21,7 @@ def parseFile( file ):
 #Tries to ping the ip given. If an exception is raised (IP is down) then returns false else returns the output
 def pingTest( ipaddr ):
 	try:
+		print('Testing IP Address: ' + ipaddr + ' ...\n')
 		output = subprocess.check_output("ping -{} 1 {}".format('n' if platform.system().lower()=="windows" else 'c', ipaddr), shell=True)
 	except Exception, e:
 		return False
@@ -42,6 +43,7 @@ def main():
 				final.append(1)
 		else :
 			final.append(0)
+	print('Results: \n')
 	for i in range(0,len(final)):
 		if (final[i] == 0):
 			print('Ip address: ' + lst[i] + ' is down' + '\n')
