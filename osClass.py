@@ -33,13 +33,13 @@ def main():
 	for item in lst:
 		output = pingTest(item)
 		if (output != False):
-			str = output.split(' ')[10][4:]
-			str = int(str)
-			if (str == 64):
+			s = output.split(' ')[11][4:]
+			s = int(s)
+			if (s == 64):
 				final.append(2)
-			if (str == 255 ):
+			if (s == 255 ):
 				final.append(3)
-			if (str == 128 ):
+			if (s == 128 ):
 				final.append(1)
 		else :
 			final.append(0)
