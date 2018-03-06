@@ -7,5 +7,7 @@ Get-Content -Path $filename | ForEach-Object {
     if ($output -match "^.*Name:.*") {
         $out=$output -split ("Address:")
         Write-Output "$_   -- $($out[7])"
+    } else {
+        Write-Output "No results found for $_"
     }
 }
