@@ -1,14 +1,16 @@
 SYNOPSIS:
-ping_sweep.sh is a ping sweeping tool written in bash and requires no external tools/dependencies other than the use of the ping tool on linux. The tool will go through the range of IPs that it's given and then output if they are up or not.
+host2ip.ps1 is a python script built to enumerate the ips from a list of provided hostnames
 
-SAMPLE USAGE:
-./ping_sweep.sh -ip 192.168.0.0/24
+ping-sweep.sh is a bash script built to enumerate hosts in a provided network range
 
-This will scan the entire 192.168.0.0 network and then list wich devices respond to a ping in the IP range.
+osClass.py is a python script built to check the OS of a list of provided ips
 
-./service-versions.py 192.168.0.0
+pScan.sh is a bash script built to scan ports on a range of ips
 
-This will attempt to connect to all ports on the specified host and return the service banners of any open ports
+service-versions.py is a python script that will scan all of the ports of the provided ip and return the service banner of any open ports
+
+
+The usage documentation is provided in a separate README.md for each of the scripts.
 
 INSTALLATION:
 Download and unzip or clone the script from https://github.com/adam-sowden/Audit_Lab3.git
